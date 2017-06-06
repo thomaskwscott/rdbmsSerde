@@ -38,17 +38,17 @@ All tables using RDBMS serde should be external and us the following template:
 CREATE EXTERNAL TABLE `<table name>`(  
     <column spec e.g. `col1` string>  )
 ROW FORMAT SERDE
-   'parquet.hive.serde.ParquetHiveSerDe'
+   'com.threefi.hive.RDBMS.RDBMSSerde’
 STORED AS INPUTFORMAT
    'com.threefi.hive.RDBMS.RDBMSInputFormat'
 OUTPUTFORMAT
-   'parquet.hive.DeprecatedParquetOutputFormat'
+   'com.threefi.hive.RDBMS.RDBMSOutputFormat'
 LOCATION
    '/tmp/rdbmsSerde'
 
 The table location should always be /tmp/rdbmsSerde as it is not relevant when reading from RDBMS instances
 
-### Adding the data to the underlying RDBMS
+### Preparation
 
 Tables should be created in all underlying RDBMS instances. They should be named the same as their hive equivalents but should include the database name and replace all . characters with _.
 e.g. Hive table default.sampleTable would map to default_sampleTable in the underlying RDBMs.
@@ -59,6 +59,10 @@ The column definitions should match the Hive table.
 
 Currently Select * type queries with no predicates do not work (as they do not launch mapreduce jobs). To query data add a predicate like the following:
 Select * from <table name> where <column name> <= 1 or <column name> > 1
+
+### Inserting data
+
+INSERT INTO statements should work with RDBMSSerde (this is still under development). INSERT OVERWRITE cases do not work.
 
 ## Authors and contributors
 

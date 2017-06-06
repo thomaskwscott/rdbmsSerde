@@ -23,6 +23,7 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
     Connection conn = null;
     ResultSet rs = null;
     String[] columnTypes = null;
+    String[] columnNames = null;
 
     public RDBMSRecordReader(InputSplit split) {
         logger.info("Creating record reader with split:" + split);
@@ -33,18 +34,23 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
     private void createResultSet(InputSplit split) throws SQLException, IOException {
 
         //retrieve query details
-        String queryColumns = ((RDBMSInputSplit) split).getColumnNames();
-        String tableName = ((RDBMSInputSplit) split).getTableName();
+        String queryColumns = TableUtils.stripColumnNames(((RDBMSInputSplit) split).getColumnNames());
+        columnNames = TableUtils.getColumnNames(((RDBMSInputSplit) split).getColumnNames());
+        String tableName = TableUtils.getTableName(((RDBMSInputSplit) split).getTableName());
         String whereClause = ((RDBMSInputSplit) split).getFilterText().length() == 0 ? "" : " where " + ((RDBMSInputSplit) split).getFilterText();
-        columnTypes = ((RDBMSInputSplit) split).getColumnTypes();
+        columnTypes = TableUtils.getColumnTypes(((RDBMSInputSplit) split).getColumnTypes());
         String username = ((RDBMSInputSplit) split).getUserName();
         String connectionString = ((RDBMSInputSplit) split).getConnectionString();
         String password = ((RDBMSInputSplit) split).getPassword();
+        logger.debug("Connecting to:" + connectionString + " as user:" + username);
 
         conn = DriverManager.getConnection(connectionString.replace("[host]", split.getLocations()[0]), username, password);
         Statement stmt = conn.createStatement();
 
-        rs = stmt.executeQuery("select " + queryColumns + " from " + tableName + " " + whereClause);
+        String sql = "select " + queryColumns + " from " + tableName + " " + whereClause;
+        logger.debug("Executing query:" + sql);
+
+        rs = stmt.executeQuery(sql);
         hasConnection = true;
 
     }
@@ -62,8 +68,8 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
         try {
             if (rs.next()) {
 
-                Writable[] row = new Writable[columnTypes.length];
-                for(int i =0; i<columnTypes.length;i++)
+                Writable[] row = new Writable[columnNames.length];
+                for(int i =0; i<columnNames.length;i++)
                 {
                     switch (columnTypes[i])
                     {
@@ -77,6 +83,7 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
                             intField.set(rs.getInt(i+1));
                             row[i] = intField;
                             break;
+
                     }
                 }
                 ((ArrayWritable)t).set(row);

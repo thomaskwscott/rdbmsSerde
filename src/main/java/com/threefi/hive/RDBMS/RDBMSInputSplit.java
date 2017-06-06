@@ -1,6 +1,5 @@
 package com.threefi.hive.RDBMS;
 
-import org.apache.derby.impl.store.access.UTF;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.UTF8;
 import org.apache.hadoop.mapred.FileSplit;
@@ -96,21 +95,12 @@ public class RDBMSInputSplit extends FileSplit implements InputSplit {
         return new Path(FAKE_PATH);
     }
 
-    public String getColumnNames()
-    {
-        StringBuilder strippedColumnNames = new StringBuilder();
-        String[] colummns = columnNames.split(",");
-
-        for(int i=0; i< colummns.length-3;i++)
-        {
-            strippedColumnNames.append(colummns[i] + ",");
-        }
-        return new String(strippedColumnNames.deleteCharAt(strippedColumnNames.length()-1));
+    public String getColumnNames() {
+        return  columnNames;
     }
 
-    public String getTableName()
-    {
-        return tableName.replace(".","_");
+    public String getTableName() {
+        return tableName;
     }
 
     public String getFilterText()
@@ -118,17 +108,7 @@ public class RDBMSInputSplit extends FileSplit implements InputSplit {
         return filterText;
     }
 
-    public String[] getColumnTypes()
-    {
-        int colummnsLength = columnNames.split(",").length-3;
-        String[] splitColumnTypes = columnTypes.split(",");
-        String [] strippedColumnTypes = new String[colummnsLength];
-        for(int i=0; i<colummnsLength;i++)
-        {
-            strippedColumnTypes[i] = splitColumnTypes[i];
-        }
-        return strippedColumnTypes;
-    }
+    public String getColumnTypes() { return columnTypes; }
 
     public String getConnectionString()
     {

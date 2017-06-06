@@ -26,23 +26,20 @@ import java.util.List;
  */
 public class RDBMSInputFormat<T> implements InputFormat<Void, T> {
 
-    public static final String HIVE_RDBMS_SERDE_CONNECTION_STRING = "hive.rdbmsSerde.connectionString";
-    public static final String HIVE_RDBMS_SERDE_NODES = "hive.rdbmsSerde.nodes";
-    public static final String HIVE_RDBMS_SERDE_USER_NAME = "hive.rdbmsSerde.userName";
-    public static final String HIVE_RDBMS_SERDE_PASSWORD = "hive.rdbmsSerde.password";
+
     private Logger logger = Logger.getLogger(RDBMSInputFormat.class);
 
 
     @Override
     public InputSplit[] getSplits(JobConf jobConf, int i) throws IOException {
 
-        String locations = jobConf.get(HIVE_RDBMS_SERDE_NODES);
+        String locations = jobConf.get(RDBMSSerdeConstants.HIVE_RDBMS_SERDE_NODES);
         logger.info("Discovered locations: " + locations);
         List<InputSplit> splits = new ArrayList<InputSplit>();
 
-        String connectionString = jobConf.get(HIVE_RDBMS_SERDE_CONNECTION_STRING);
-        String userName = jobConf.get(HIVE_RDBMS_SERDE_USER_NAME);
-        String password = jobConf.get(HIVE_RDBMS_SERDE_PASSWORD);
+        String connectionString = jobConf.get(RDBMSSerdeConstants.HIVE_RDBMS_SERDE_CONNECTION_STRING);
+        String userName = jobConf.get(RDBMSSerdeConstants.HIVE_RDBMS_SERDE_USER_NAME);
+        String password = jobConf.get(RDBMSSerdeConstants.HIVE_RDBMS_SERDE_PASSWORD);
         String columnNames = jobConf.get(serdeConstants.LIST_COLUMNS);
         String tableName = jobConf.get(hive_metastoreConstants.META_TABLE_NAME);
         String columnTypes = jobConf.get(serdeConstants.LIST_COLUMN_TYPES);

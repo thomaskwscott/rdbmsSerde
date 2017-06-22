@@ -7,7 +7,7 @@ import org.apache.hadoop.hive.serde2.*;
 import org.apache.hadoop.hive.serde2.objectinspector.ObjectInspector;
 import org.apache.hadoop.hive.serde2.objectinspector.StructField;
 import org.apache.hadoop.hive.serde2.objectinspector.StructObjectInspector;
-import org.apache.hadoop.hive.serde2.objectinspector.primitive.StringObjectInspector;
+import org.apache.hadoop.hive.serde2.objectinspector.primitive.*;
 import org.apache.hadoop.hive.serde2.typeinfo.StructTypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfo;
 import org.apache.hadoop.hive.serde2.typeinfo.TypeInfoFactory;
@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
+import static org.apache.hadoop.hive.serde.serdeConstants.STRING_TYPE_NAME;
 
 /**
  * Created by tscott on 05/06/2017.
@@ -59,7 +61,7 @@ public class RDBMSSerde extends AbstractSerDe {
         }
 
         if (columnNames.size() != columnTypes.size()) {
-            throw new IllegalArgumentException("ParquetHiveSerde initialization failed. Number of column " +
+            throw new IllegalArgumentException("RdbmsSerde initialization failed. Number of column " +
                     "name and column type differs. columnNames = " + columnNames + ", columnTypes = " +
                     columnTypes);
         }
@@ -91,11 +93,32 @@ public class RDBMSSerde extends AbstractSerDe {
             final Object field = outputRowOI.getStructFieldData(o, outputFieldRefs.get(c));
             final ObjectInspector fieldOI = outputFieldRefs.get(c).getFieldObjectInspector();
 
-            // The data must be of type String
-            final StringObjectInspector fieldStringOI = (StringObjectInspector) fieldOI;
+            if(fieldOI.getTypeName().equals(serdeConstants.STRING_TYPE_NAME)) {
+                // The data must be of type String
+                final StringObjectInspector fieldStringOI = (StringObjectInspector) fieldOI;
+                row[c] = fieldStringOI.getPrimitiveJavaObject(field);
+            }
+            if(fieldOI.getTypeName().equals(serdeConstants.BIGINT_TYPE_NAME)) {
+                // The data must be of type String
+                final LongObjectInspector fieldLongOI = (LongObjectInspector) fieldOI;
+                row[c] = fieldLongOI.getPrimitiveJavaObject(field).toString();
+            }
+            if(fieldOI.getTypeName().equals(serdeConstants.INT_TYPE_NAME)) {
+                // The data must be of type String
+                final IntObjectInspector fieldIntOI = (IntObjectInspector) fieldOI;
+                row[c] = fieldIntOI.getPrimitiveJavaObject(field).toString();
+            }
+            if(fieldOI.getTypeName().equals(serdeConstants.DOUBLE_TYPE_NAME)) {
+                // The data must be of type String
+                final DoubleObjectInspector fieldDoubleOI = (DoubleObjectInspector) fieldOI;
+                row[c] = fieldDoubleOI.getPrimitiveJavaObject(field).toString();
+            }
+            if(fieldOI.getTypeName().equals(serdeConstants.FLOAT_TYPE_NAME)) {
+                // The data must be of type String
+                final FloatObjectInspector fieldFloatOI = (FloatObjectInspector) fieldOI;
+                row[c] = fieldFloatOI.getPrimitiveJavaObject(field).toString();
+            }
 
-
-            row[c] = fieldStringOI.getPrimitiveJavaObject(field);
         }
         ArrayWritable out = new ArrayWritable(row);
         logger.debug("Serialized to:" + out.toString());

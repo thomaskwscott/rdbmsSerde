@@ -6,16 +6,20 @@ import org.apache.log4j.Logger;
  * Created by tscott on 04/06/2017.
  */
 public class TableUtils {
-    
+
 
     public static String stripColumnNames(String columnNames)
     {
         StringBuilder strippedColumnNames = new StringBuilder();
-        String[] colummns = columnNames.split(",");
+        String[] columns = columnNames.split(",");
 
-        for(int i=0; i< colummns.length-3;i++)
+        for(int i=0; i< columns.length;i++)
         {
-            strippedColumnNames.append(colummns[i] + ",");
+            if(!columns[i].equals("BLOCK__OFFSET__INSIDE__FILE")
+             && !columns[i].equals("INPUT__FILE__NAME")
+             && !columns[i].equals("ROW__ID")) {
+                strippedColumnNames.append(columns[i] + ",");
+            }
         }
         if(strippedColumnNames.length() > 0) {
             return new String(strippedColumnNames.deleteCharAt(strippedColumnNames.length() - 1));
@@ -45,4 +49,5 @@ public class TableUtils {
     {
         return tableName.replace(".","_");
     }
+
 }

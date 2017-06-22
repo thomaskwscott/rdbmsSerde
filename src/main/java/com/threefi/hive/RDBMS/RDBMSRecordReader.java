@@ -1,9 +1,7 @@
 package com.threefi.hive.RDBMS;
 
-import org.apache.hadoop.io.ArrayWritable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.hive.serde2.io.TimestampWritable;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.log4j.Logger;
@@ -83,7 +81,21 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
                             intField.set(rs.getInt(i+1));
                             row[i] = intField;
                             break;
-
+                        case "bigint":
+                            LongWritable longField = new LongWritable();
+                            longField.set(rs.getLong(i+1));
+                            row[i] = longField;
+                            break;
+                        case "float":
+                            FloatWritable floatField = new FloatWritable();
+                            floatField.set(rs.getFloat(i+1));
+                            row[i] = floatField;
+                            break;
+                        case "double":
+                            DoubleWritable doubleField = new DoubleWritable();
+                            doubleField.set(rs.getDouble(i+1));
+                            row[i] = doubleField;
+                            break;
                     }
                 }
                 ((ArrayWritable)t).set(row);

@@ -83,6 +83,8 @@ public class RDBMSRecordWriter implements FileSinkOperator.RecordWriter {
         {
             case "STRING":
                 return "'" + value + "'";
+            case "TIMESTAMP":
+                return "'" + value + "'";
             default:
                 return value;
         }

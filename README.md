@@ -48,12 +48,28 @@ LOCATION
 
 The table location should always be /tmp/rdbmsSerde as it is not relevant when reading from RDBMS instances
 
-### Preparation
+rdbmsSerde requires tables to be created in the underlying databases that provide storage. A post exec hook is provided to automate this. To configure this add the following property:
 
-Tables should be created in all underlying RDBMS instances. They should be named the same as their hive equivalents but should include the database name and replace all . characters with _.
-e.g. Hive table default.sampleTable would map to default_sampleTable in the underlying RDBMs.
+<table>
+<thead>
+<td>Name</td><td>Value</td>
+</thead>
+<tr>
+<td>hive.exec.post.hooks<td><td>com.threefi.hive.RDBMS.hooks.CreateTableHook</td>
+</tr>
+</table>
 
-The column definitions should match the Hive table.
+Important Note: For the post exec hook to work the create table statement must include the database name.
+
+### Supported Types
+
+The following Hive types are supports in RDBMS serde:
+
+INT
+BIGINT
+FLOAT
+DOUBLE  
+STRING
 
 ### Querying the data
 

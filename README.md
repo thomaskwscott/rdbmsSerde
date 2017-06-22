@@ -65,16 +65,16 @@ Important Note: For the post exec hook to work the create table statement must i
 
 The following Hive types are supports in RDBMS serde:
 
-INT
-BIGINT
-FLOAT
-DOUBLE  
-STRING
+- INT
+- BIGINT
+- FLOAT
+- DOUBLE  
+- STRING
 
 ### Querying the data
 
 Currently Select * type queries with no predicates do not work (as they do not launch mapreduce jobs). To query data add a predicate like the following:
-Select * from <table name> where <column name> <= 1 or <column name> > 1
+Select * from [table name] where [column name] <= 1 or [column name] > 1
 
 ### Inserting data
 

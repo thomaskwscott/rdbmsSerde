@@ -60,5 +60,21 @@ public class TestCreateTableHook {
 
     }
 
+    @Test
+    public void pluckDecimalsReplacesDecimals() {
+        CreateTableHook hook = new CreateTableHook();
+
+        String testStatement = "CREATE EXTERNAL TABLE default.blah (col1 decimal(4,2), col2 decimal(5,3))";
+
+        String out = hook.pluckDecimals(testStatement);
+        String out2 = hook.convertCreateQuery(testStatement);
+
+        Assert.assertEquals("create external table default.blah (col1 decimal0, col2 decimal1)",out);
+        Assert.assertEquals("create table default_blah (col1 decimal(4,2),col2 decimal(5,3))",out2);
+
+
+
+    }
+
 
 }

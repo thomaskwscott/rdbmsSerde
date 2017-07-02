@@ -1,12 +1,14 @@
 package com.threefi.hive.RDBMS;
 
-import org.apache.hadoop.hive.serde2.io.TimestampWritable;
+import org.apache.hadoop.hive.common.type.HiveDecimal;
+import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.*;
 
 /**
@@ -55,7 +57,7 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
 
     @Override
     public boolean next(Void aVoid, T t) throws IOException {
-        if(!hasConnection){
+        if (!hasConnection) {
             try {
                 createResultSet(split);
             } catch (SQLException e) {
@@ -65,48 +67,54 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
 
         try {
             if (rs.next()) {
-
                 Writable[] row = new Writable[columnNames.length];
-                for(int i =0; i<columnNames.length;i++)
-                {
-                    switch (columnTypes[i])
-                    {
-                        case "string":
-                            Text stringField = new Text();
-                            stringField.set(rs.getString(i+1));
-                            row[i] = stringField;
-                            break;
-                        case "int":
-                            IntWritable intField = new IntWritable();
-                            intField.set(rs.getInt(i+1));
-                            row[i] = intField;
-                            break;
-                        case "bigint":
-                            LongWritable longField = new LongWritable();
-                            longField.set(rs.getLong(i+1));
-                            row[i] = longField;
-                            break;
-                        case "float":
-                            FloatWritable floatField = new FloatWritable();
-                            floatField.set(rs.getFloat(i+1));
-                            row[i] = floatField;
-                            break;
-                        case "double":
-                            DoubleWritable doubleField = new DoubleWritable();
-                            doubleField.set(rs.getDouble(i+1));
-                            row[i] = doubleField;
-                            break;
+                for (int i = 0; i < columnNames.length; i++) {
+
+                    if (columnTypes[i].equals("string")) {
+                        Text stringField = new Text();
+                        stringField.set(rs.getString(i + 1));
+                        row[i] = stringField;
+                    }
+                    if (columnTypes[i].equals("int")) {
+                        IntWritable intField = new IntWritable();
+                        intField.set(rs.getInt(i + 1));
+                        row[i] = intField;
+                    }
+                    if (columnTypes[i].equals("bigint")) {
+                        LongWritable longField = new LongWritable();
+                        longField.set(rs.getLong(i + 1));
+                        row[i] = longField;
+                    }
+                    if (columnTypes[i].equals("float")) {
+                        FloatWritable floatField = new FloatWritable();
+                        floatField.set(rs.getFloat(i + 1));
+                        row[i] = floatField;
+                    }
+                    if (columnTypes[i].equals("double")) {
+                        DoubleWritable doubleField = new DoubleWritable();
+                        doubleField.set(rs.getDouble(i + 1));
+                        row[i] = doubleField;
+                    }
+                    if (columnTypes[i].startsWith("decimal")) {
+                        HiveDecimalWritable decimalField = new HiveDecimalWritable();
+                        BigDecimal in = rs.getBigDecimal(i + 1);
+                        decimalField.set(HiveDecimal.create(in));
+                        row[i] = decimalField;
                     }
                 }
-                ((ArrayWritable)t).set(row);
+                ((ArrayWritable) t).set(row);
                 return true;
             }
             conn.close();
-        } catch (SQLException e) {
-            logger.error("Could not close connection",e);
-            throw  new IOException("Could not close connection",e);
+        } catch (
+                SQLException e)
+
+        {
+            logger.error("Could not close connection", e);
+            throw new IOException("Could not close connection", e);
         }
-        hasNext=false;
+
+        hasNext = false;
         return false;
     }
 
@@ -117,13 +125,13 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
 
     @Override
     public T createValue() {
-        ArrayWritable out = new ArrayWritable(new String[] {  });
-        return (T)out;
+        ArrayWritable out = new ArrayWritable(new String[]{});
+        return (T) out;
     }
 
     @Override
     public long getPos() throws IOException {
-        return hasNext?0l:1l;
+        return hasNext ? 0l : 1l;
     }
 
     @Override
@@ -133,6 +141,6 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
 
     @Override
     public float getProgress() throws IOException {
-        return hasNext?0.0f:1.0f;
+        return hasNext ? 0.0f : 1.0f;
     }
 }

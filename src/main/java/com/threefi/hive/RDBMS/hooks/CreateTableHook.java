@@ -11,6 +11,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by tscott on 19/06/2017.
@@ -18,6 +20,7 @@ import java.sql.Statement;
 public class CreateTableHook implements ExecuteWithHookContext {
 
     private Logger logger = Logger.getLogger(CreateTableHook.class);
+    private List<String> decimals = new ArrayList<String>();
 
     @Override
     public void run(HookContext hookContext) throws Exception {
@@ -44,8 +47,27 @@ public class CreateTableHook implements ExecuteWithHookContext {
 
     }
 
+    protected String pluckDecimals(String in) {
+        in = in.toLowerCase();
+        int decimalCounter=0;
+        while(in.contains("decimal(")){
+            int startPos = in.indexOf("decimal(");
+            String before = in.substring(0,startPos);
+            String after = in.substring(startPos);
+            String decimalVal = after.substring(0,after.indexOf(")") + 1);
+            decimals.add(decimalVal);
+            after = after.substring(after.indexOf(")") + 1);
+            in = before + "decimal**" + decimalCounter + after;
+            decimalCounter++;
+        }
+        return in;
+    }
+
     protected String convertCreateQuery(String origQuery)
     {
+        // remove decimals first as they REALLY get in the way
+        origQuery = pluckDecimals(origQuery);
+
         // split out columns section
         StringBuilder builder = new StringBuilder();
         String beforeColumns = origQuery.substring(0,origQuery.indexOf("(")).toLowerCase();
@@ -60,7 +82,7 @@ public class CreateTableHook implements ExecuteWithHookContext {
             String[] defs = columnDef.trim().split("\\s+");
             String columnName = defs[0];
             String columnType = defs[1];
-            if(columnType.toLowerCase().equals("string") || columnType.toLowerCase().equals("STRING")) {
+            if(columnType.toLowerCase().equals("string")) {
                 columnType = "varchar(4000)";
             }
             colSection.append(columnName);
@@ -68,10 +90,15 @@ public class CreateTableHook implements ExecuteWithHookContext {
             colSection.append(columnType);
             colSection.append(",");
         }
-        builder.append(colSection.substring(0,colSection.length()-1));
+        // strip unneeded sections
+        String out  = colSection.substring(0,colSection.length()-1);
+        for(int i = 0; i<decimals.size();i++)
+        {
+            out = out.replace("decimal**" + i, decimals.get(i));
+        }
+        builder.append(out);
         builder.append(")");
 
-        // strip unneeded sections
         return builder.toString();
     }
 

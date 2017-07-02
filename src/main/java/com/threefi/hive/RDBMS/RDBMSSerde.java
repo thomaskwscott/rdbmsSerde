@@ -1,6 +1,7 @@
 package com.threefi.hive.RDBMS;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.ql.io.parquet.serde.ArrayWritableObjectInspector;
 import org.apache.hadoop.hive.serde.serdeConstants;
 import org.apache.hadoop.hive.serde2.*;
@@ -118,7 +119,11 @@ public class RDBMSSerde extends AbstractSerDe {
                 final FloatObjectInspector fieldFloatOI = (FloatObjectInspector) fieldOI;
                 row[c] = fieldFloatOI.getPrimitiveJavaObject(field).toString();
             }
-
+            if(fieldOI.getTypeName().startsWith(serdeConstants.DECIMAL_TYPE_NAME)) {
+                // The data must be of type String
+                final HiveDecimalObjectInspector fieldDecimalOI = (HiveDecimalObjectInspector) fieldOI;
+                row[c] = fieldDecimalOI.getPrimitiveJavaObject(field).toString();
+            }
         }
         ArrayWritable out = new ArrayWritable(row);
         logger.debug("Serialized to:" + out.toString());

@@ -2,6 +2,7 @@ package com.threefi.hive.RDBMS;
 
 import org.apache.hadoop.hive.common.type.HiveDecimal;
 import org.apache.hadoop.hive.serde2.io.HiveDecimalWritable;
+import org.apache.hadoop.hive.serde2.io.TimestampWritable;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.RecordReader;
@@ -100,6 +101,12 @@ public class RDBMSRecordReader<T> implements RecordReader<Void, T> {
                         BigDecimal in = rs.getBigDecimal(i + 1);
                         decimalField.set(HiveDecimal.create(in));
                         row[i] = decimalField;
+                    }
+                    if(columnTypes[i].equals("timestamp")) {
+                        TimestampWritable timestampField = new TimestampWritable();
+                        Timestamp in = rs.getTimestamp(i + 1);
+                        timestampField.set(in);
+                        row[i] = timestampField;
                     }
                 }
                 ((ArrayWritable) t).set(row);

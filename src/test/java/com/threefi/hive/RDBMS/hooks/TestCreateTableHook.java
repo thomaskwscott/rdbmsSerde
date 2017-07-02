@@ -69,7 +69,7 @@ public class TestCreateTableHook {
         String out = hook.pluckDecimals(testStatement);
         String out2 = hook.convertCreateQuery(testStatement);
 
-        Assert.assertEquals("create external table default.blah (col1 decimal0, col2 decimal1)",out);
+        Assert.assertEquals("create external table default.blah (col1 decimal**0, col2 decimal**1)",out);
         Assert.assertEquals("create table default_blah (col1 decimal(4,2),col2 decimal(5,3))",out2);
 
 

@@ -124,6 +124,12 @@ public class RDBMSSerde extends AbstractSerDe {
                 final HiveDecimalObjectInspector fieldDecimalOI = (HiveDecimalObjectInspector) fieldOI;
                 row[c] = fieldDecimalOI.getPrimitiveJavaObject(field).toString();
             }
+            if(fieldOI.getTypeName().equals(serdeConstants.TIMESTAMP_TYPE_NAME)) {
+                // The data must be of type String
+                final TimestampObjectInspector timestampFloatOI = (TimestampObjectInspector) fieldOI;
+                row[c] = timestampFloatOI.getPrimitiveJavaObject(field).toString();
+            }
+
         }
         ArrayWritable out = new ArrayWritable(row);
         logger.debug("Serialized to:" + out.toString());

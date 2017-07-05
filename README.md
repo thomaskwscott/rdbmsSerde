@@ -70,6 +70,8 @@ The following Hive types are supports in RDBMS serde:
 - FLOAT
 - DOUBLE  
 - STRING
+- DECIMAL
+- TIMESTAMP
 
 ### Querying the data
 
